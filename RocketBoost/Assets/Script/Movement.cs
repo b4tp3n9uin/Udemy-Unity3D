@@ -5,10 +5,22 @@ using UnityEngine;
 
 public class Movement : MonoBehaviour
 {
+    [Header("Physics")]
     public Rigidbody rb;
-    public AudioSource audio;
     public float TurnRate = 1000;
     public float RotationThrust = 50;
+
+    [Header("Audio Clips")]
+    public AudioSource audio;
+    public AudioClip MainEngine;
+    public AudioClip GoalPoint;
+    public AudioClip Crash;
+
+    [Header("Particles")]
+    public ParticleSystem LBooster;
+    public ParticleSystem RBooster;
+    public ParticleSystem LSmBooster;
+    public ParticleSystem RSmBooster;
 
     // Start is called before the first frame update
     void Start()
@@ -28,15 +40,29 @@ public class Movement : MonoBehaviour
     {
         if (Input.GetKey(KeyCode.Space))
         {
-            rb.AddRelativeForce(Vector3.up * TurnRate * Time.deltaTime);
-
-            if (!audio.isPlaying)
-            {
-                audio.Play();
-            }
+            BoostRocket();
         }
         else
             audio.Stop();
+            RBooster.Stop();
+            LBooster.Stop();
+    }
+
+    void BoostRocket()
+    {
+        rb.AddRelativeForce(Vector3.up * TurnRate * Time.deltaTime);
+
+        if (!audio.isPlaying)
+        {
+            audio.PlayOneShot(MainEngine);
+        }
+
+        if (!RBooster.isPlaying && !LBooster.isPlaying)
+        {
+            //Debug.Log("Activated");
+            RBooster.Play();
+            LBooster.Play();
+        }
     }
 
     void Rotate()
@@ -44,12 +70,19 @@ public class Movement : MonoBehaviour
         if (Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.LeftArrow))
         {
             InputRotation(RotationThrust);
+
+            if (!LSmBooster.isPlaying) { LSmBooster.Play(); }
         }
 
         else if (Input.GetKey(KeyCode.D) || Input.GetKey(KeyCode.RightArrow))
         {
             InputRotation(-RotationThrust);
+
+            if (!RSmBooster.isPlaying) { RSmBooster.Play(); }
         }
+        else
+            RSmBooster.Stop();
+            LSmBooster.Stop();
     }
 
     void InputRotation(float TurnDirection)
